@@ -53,6 +53,8 @@ void MainWindow::on_open_close_clicked()
         closeserial();
 }
 
+
+
 void MainWindow::openserial()
 {
     foreach (const QSerialPortInfo &com_info, QSerialPortInfo::availablePorts())
