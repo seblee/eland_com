@@ -19,6 +19,26 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+typedef enum {
+    KEY_FUN_NONE = 0x00, /*空命令*/
+    KEY_READ_02 = 0X02,
+    TIME_SET_03,
+    TIME_READ_04,
+    ELAND_STATES_05,
+} __msg_function_t;
+
+typedef enum {
+    ElandNone = 0,
+    ElandBegin,
+    ElandAPStatus,
+    ElandHttpServerStatus,
+    ElandWifyConnectedSuccessed,
+    ElandWifyConnectedFailed,
+    ElandAliloPlay,
+    ElandAliloPause,
+    ElandAliloStop,
+} Eland_Status_type_t;
+
 void MainWindow::Read_Data()
 {
     QByteArray buf;
@@ -26,11 +46,67 @@ void MainWindow::Read_Data()
     if(!buf.isEmpty())
     {
         ReadDataTimes++;
-        QString str = ui->receivedtext->toPlainText();
+        if(ui->comboBox->currentIndex() == 0)
+        {
+            QString str = ui->receivedtext->toPlainText();
+            str += tr(buf);
+            ui->receivedtext->clear();
+            ui->receivedtext->append(str);
+        }
+        else if(ui->comboBox->currentIndex() == 1)
+        {
+            QString str;
+            str.clear();
+            if(buf.at(0) == 0x55)
+            {
+                switch (buf.at(1)) {
+                case KEY_READ_02:
+                    //str += tr("read key ");
+                    //ui->receivedtext->insertPlainText(str);
+                    break;
+                case TIME_SET_03:
+                    str += tr("time set \r\n");
+                    ui->receivedtext->insertPlainText(str);
+                    break;
+                case TIME_READ_04:
+                    str += tr("time read \r\n");
+                    ui->receivedtext->insertPlainText(str);
+                    break;
+                case ELAND_STATES_05:
+                    str += tr("state ");
+                    if(buf.at(3) == ElandBegin)
+                        str += tr("ElandBegin \r\n");
+                    else if(buf.at(3) == ElandAPStatus)
+                        str += tr("ElandAPStatus  \r\n");
+                    else if(buf.at(3) == ElandHttpServerStatus)
+                        str += tr("HttpServer  \r\n");
+                    else if(buf.at(3) == ElandWifyConnectedSuccessed)
+                        str += tr("WifyConnected  \r\n");
+                    else if(buf.at(3) == ElandWifyConnectedFailed)
+                        str += tr("WifyFailed  \r\n");
+                    ui->receivedtext->insertPlainText(str);
+                    break;
+                default:
+                    break;
+                }
 
-        str += tr(buf);
-        ui->receivedtext->clear();
-        ui->receivedtext->append(str);
+            }
+            qDebug() << "buf.size:  " << QString::number(buf.size(),10);
+
+
+        }
+        else if(ui->comboBox->currentIndex() == 2)
+        {
+            QString str;
+            for(int i = 0;i < buf.size();i++)
+            {
+                //str.setNum()
+                if((buf.at(i) < 10)&&(buf.at(i) >= 0))
+                    str += tr("0");
+                str += QString::number(buf.at(i)&0xFF,16) + tr(" ");
+            }
+            ui->receivedtext->append(str);
+        }
     }
     buf.clear();
 }
@@ -97,4 +173,10 @@ void MainWindow::closeserial()
 void MainWindow::on_cleartext_clicked()
 {
     ui->receivedtext->clear();
+}
+
+void MainWindow::on_comboBox_currentIndexChanged(int index)
+{
+    QString str = QString::number(index,10);
+    qDebug() <<  "currentIndex:%d" <<  str   ;
 }

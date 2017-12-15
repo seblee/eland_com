@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>725</width>
-    <height>547</height>
+    <width>1000</width>
+    <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -81,6 +81,36 @@ background-color: rgb(59, 59, 59);</string>
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QComboBox" name="comboBox">
+          <property name="maximumSize">
+           <size>
+            <width>170</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>20</pointsize>
+           </font>
+          </property>
+          <item>
+           <property name="text">
+            <string>字符串輸出</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>MCU協議</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>HEX顯示</string>
+           </property>
+          </item>
+         </widget>
+        </item>
        </layout>
       </item>
      </layout>
@@ -92,7 +122,7 @@ background-color: rgb(59, 59, 59);</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>725</width>
+     <width>1000</width>
      <height>21</height>
     </rect>
    </property>
