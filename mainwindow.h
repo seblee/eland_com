@@ -19,14 +19,18 @@ public:
 
 private slots:
     void Read_Data();
-
+    void handleError(QSerialPort::SerialPortError error);
     void on_open_close_clicked();
+
+    void on_cleartext_clicked();
 
 private:
     Ui::MainWindow *ui;
     QSerialPort *serial;
     bool serialOpened;
     uint32_t ReadDataTimes;
+    void openserial();
+    void closeserial();
 };
 
 #endif // MAINWINDOW_H
