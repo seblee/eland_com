@@ -33,4 +33,6 @@ HEADERS += \
 
 FORMS += \
         mainwindow.ui
-CONFIG += debug
+#CONFIG += debug
+
+RC_ICONS = bitbug_favicon.ico

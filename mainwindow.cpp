@@ -69,25 +69,27 @@ void MainWindow::openserial()
             serial->setParity(QSerialPort::NoParity);
             serial->setStopBits(QSerialPort::OneStop);
             serialOpened = true;
-            QString str = "Serial Opened";
+
+            QString str = serial->portName() + " Opened";
             //ui->receivedtext->insertPlainText(str);
             ui->receivedtext->append(str);
             connect(serial, static_cast<void (QSerialPort::*)(QSerialPort::SerialPortError)>(&QSerialPort::error),
                     this, &MainWindow::handleError);    //连接槽，串口出现问题连接到错误处理函数
             QObject::connect(serial,&QSerialPort::readyRead,this,&MainWindow::Read_Data);
             qDebug() << "find the serial: " << com_info.description();
-            ui->open_close->setText(tr("Close serial"));
+            ui->open_close->setText(tr("Close serial ") + serial->portName());
         }
     }
 }
 
 void MainWindow::closeserial()
 {
+    QString str = serial->portName() + " Closed";
     serial->clear();
     serial->close();
     serial->deleteLater();
     serialOpened = false;
-    QString str =  "Serial closed";
+
     ui->receivedtext->append(str);
     ui->open_close->setText(tr("Open serial"));
 }
