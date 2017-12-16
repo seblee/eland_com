@@ -25,90 +25,134 @@ typedef enum {
     TIME_SET_03,
     TIME_READ_04,
     ELAND_STATES_05,
+    FIRM_WARE_06,
 } __msg_function_t;
 
 typedef enum {
     ElandNone = 0,
     ElandBegin,
-    ElandAPStatus,
-    ElandHttpServerStatus,
-    ElandWifyConnectedSuccessed,
-    ElandWifyConnectedFailed,
+    APStatus,
+    APStatusClosed,
+    HttpServerStatus,
+    HttpServerStop,
+    ELAPPConnected,
+    WifyConnected,
+    WifyDisConnected,
+    WifyConnectedFailed,
     ElandAliloPlay,
     ElandAliloPause,
     ElandAliloStop,
+    HTTP_Get_HOST_INFO,
+    TCPConnectedELSV,
+    TCPHealthCheck,
 } Eland_Status_type_t;
 
 void MainWindow::Read_Data()
 {
-    QByteArray buf;
-    buf=serial->readAll();
+    static QByteArray buf;
+    buf += serial->readAll();
     if(!buf.isEmpty())
     {
         ReadDataTimes++;
-        if(ui->comboBox->currentIndex() == 0)
+        if(ui->comboBox->currentIndex() == 0)//字符
         {
             QString str = ui->receivedtext->toPlainText();
             str += tr(buf);
             ui->receivedtext->clear();
             ui->receivedtext->append(str);
+            buf.clear();
         }
-        else if(ui->comboBox->currentIndex() == 1)
+        else if(ui->comboBox->currentIndex() == 1)//協議
         {
-            QString str;
-            str.clear();
-            if(buf.at(0) == 0x55)
+            while (!buf.isEmpty())
             {
-                switch (buf.at(1)) {
-                case KEY_READ_02:
-                    //str += tr("read key ");
-                    //ui->receivedtext->insertPlainText(str);
-                    break;
-                case TIME_SET_03:
-                    str += tr("time set \r\n");
-                    ui->receivedtext->insertPlainText(str);
-                    break;
-                case TIME_READ_04:
-                    str += tr("time read \r\n");
-                    ui->receivedtext->insertPlainText(str);
-                    break;
-                case ELAND_STATES_05:
-                    str += tr("state ");
-                    if(buf.at(3) == ElandBegin)
-                        str += tr("ElandBegin \r\n");
-                    else if(buf.at(3) == ElandAPStatus)
-                        str += tr("ElandAPStatus  \r\n");
-                    else if(buf.at(3) == ElandHttpServerStatus)
-                        str += tr("HttpServer  \r\n");
-                    else if(buf.at(3) == ElandWifyConnectedSuccessed)
-                        str += tr("WifyConnected  \r\n");
-                    else if(buf.at(3) == ElandWifyConnectedFailed)
-                        str += tr("WifyFailed  \r\n");
-                    ui->receivedtext->insertPlainText(str);
-                    break;
-                default:
-                    break;
+                if(buf.startsWith((char)0x55))
+                {
+                    if(buf.length() < 3)
+                        return;
+                    else if(buf.length() < (buf.at(2) + 3))
+                        return;
+                    else if((uint8_t)buf.at(3 + buf.at(2)) != 0xaa)
+                    {
+                        buf.remove(0,1);
+                        continue;
+                    }
+                    QString str;
+                    str.clear();
+                    switch (buf.at(1)) {
+                    case KEY_READ_02:
+                        //str += tr("read key ");
+                        //ui->receivedtext->insertPlainText(str);
+                        break;
+                    case TIME_SET_03:
+                        str += tr("time set \r\n");
+                        ui->receivedtext->insertPlainText(str);
+                        break;
+                    case TIME_READ_04:
+                        str += tr("time read \r\n");
+                        ui->receivedtext->insertPlainText(str);
+                        break;
+                    case ELAND_STATES_05:
+                        str += tr("STATE:");
+                        if(buf.at(3) == ElandBegin)
+                            str += tr("ElandBegin \r\n");
+                        else if(buf.at(3) == APStatus)
+                            str += tr("StartAPStatus  \r\n");
+                        else if(buf.at(3) == APStatusClosed)
+                            str += tr("APStatusClosed\r\n");
+                        else if(buf.at(3) == HttpServerStatus)
+                            str += tr("HttpServer Start \r\n");
+                        else if(buf.at(3) == HttpServerStop)
+                            str += tr("HttpServerStop \r\n");
+                        else if(buf.at(3) == ELAPPConnected)
+                            str += tr("ELAPPConnected \r\n");
+                        else if(buf.at(3) == WifyConnected)
+                            str += tr("WifyConnected  \r\n");
+                        else if(buf.at(3) == WifyDisConnected)
+                            str += tr("WifyDisConnected  \r\n");
+                        else if(buf.at(3) == WifyConnectedFailed)
+                            str += tr("WifyFailed  \r\n");
+                        else if(buf.at(3) == HTTP_Get_HOST_INFO)
+                            str += tr("HTTP_Get_HOST_INFO  \r\n");
+                        else if(buf.at(3) == TCPConnectedELSV)
+                            str += tr("TCPConnectedELSV  \r\n");
+                        ui->receivedtext->insertPlainText(str);
+                        break;
+                    case FIRM_WARE_06:
+                        str += tr("firmware :") +tr((buf.data()+3)) +tr("\r\n");
+                        ui->receivedtext->insertPlainText(str);
+                        break;
+                    default:
+                        break;
+                    }
+                    buf.remove(0,4 + buf.at(2));
+                    continue;
+                }
+                else
+                {
+                    buf.remove(0,1);
                 }
 
             }
             qDebug() << "buf.size:  " << QString::number(buf.size(),10);
-
-
         }
-        else if(ui->comboBox->currentIndex() == 2)
+        else if(ui->comboBox->currentIndex() == 2)//hex輸出
         {
             QString str;
             for(int i = 0;i < buf.size();i++)
             {
                 //str.setNum()
-                if((buf.at(i) < 10)&&(buf.at(i) >= 0))
+                if((buf.at(i) < 0x10)&&(buf.at(i) >= 0))
                     str += tr("0");
+
                 str += QString::number(buf.at(i)&0xFF,16) + tr(" ");
             }
-            ui->receivedtext->append(str);
+            ui->receivedtext->insertPlainText(str);
+            buf.clear();
         }
+
     }
-    buf.clear();
+
 }
 void MainWindow::handleError(QSerialPort::SerialPortError error)
 {
@@ -185,4 +229,11 @@ void MainWindow::on_comboBox_currentIndexChanged(int index)
 {
     QString str = QString::number(index,10);
     qDebug() <<  "currentIndex:%d" <<  str   ;
+}
+
+void MainWindow::on_receivedtext_textChanged()
+{
+    QTextCursor cursor = ui->receivedtext->textCursor();
+    ui->receivedtext->moveCursor(QTextCursor::End);
+    ui->receivedtext->setTextCursor(cursor);
 }

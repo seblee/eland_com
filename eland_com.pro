@@ -35,4 +35,11 @@ FORMS += \
         mainwindow.ui
 #CONFIG += debug
 
+DISTFILES +=
+
+RESOURCES += \
+    resource.qrc
+
+DISTFILES += \
+    myRc.rc
 RC_ICONS = bitbug_favicon.ico

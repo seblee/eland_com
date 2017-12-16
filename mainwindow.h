@@ -26,6 +26,8 @@ private slots:
 
     void on_comboBox_currentIndexChanged(int index);
 
+    void on_receivedtext_textChanged();
+
 private:
     Ui::MainWindow *ui;
     QSerialPort *serial;
