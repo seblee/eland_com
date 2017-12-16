@@ -35,6 +35,12 @@
 color: rgb(85, 255, 255);
 background-color: rgb(59, 59, 59);</string>
         </property>
+        <property name="horizontalScrollBarPolicy">
+         <enum>Qt::ScrollBarAlwaysOff</enum>
+        </property>
+        <property name="lineWrapMode">
+         <enum>QTextEdit::WidgetWidth</enum>
+        </property>
        </widget>
       </item>
       <item>

@@ -112,10 +112,16 @@ void MainWindow::Read_Data()
 }
 void MainWindow::handleError(QSerialPort::SerialPortError error)
 {
+    qDebug() << "SerialPortError " << QString::number(error,10);
     if(error == QSerialPort::ResourceError)
     {
         QMessageBox::critical(this,tr("Critical Error"),serial->errorString());
         closeserial();
+    }
+    else if(error == QSerialPort::PermissionError)
+    {
+        QMessageBox::critical(this,tr("Critical Error"),tr("\r\nThe serial has been already opened\r\nPlease Check"));
+        //closeserial();
     }
 }
 
@@ -138,22 +144,22 @@ void MainWindow::openserial()
         if(com_info.description()=="USB Serial Port")
         {
             serial = new QSerialPort;
-            serial->setPortName(com_info.portName());
-            serial->open(QIODevice::ReadWrite);
-            serial->setBaudRate(115200);
-            serial->setDataBits(QSerialPort::Data8);
-            serial->setParity(QSerialPort::NoParity);
-            serial->setStopBits(QSerialPort::OneStop);
-            serialOpened = true;
+            connect(serial, static_cast<void (QSerialPort::*)(QSerialPort::SerialPortError)>(&QSerialPort::error), this, &MainWindow::handleError);    //连接槽，串口出现问题连接到错误处理函数
 
-            QString str = serial->portName() + " Opened";
-            //ui->receivedtext->insertPlainText(str);
-            ui->receivedtext->append(str);
-            connect(serial, static_cast<void (QSerialPort::*)(QSerialPort::SerialPortError)>(&QSerialPort::error),
-                    this, &MainWindow::handleError);    //连接槽，串口出现问题连接到错误处理函数
-            QObject::connect(serial,&QSerialPort::readyRead,this,&MainWindow::Read_Data);
-            qDebug() << "find the serial: " << com_info.description();
-            ui->open_close->setText(tr("Close serial ") + serial->portName());
+            serial->setPortName(com_info.portName());
+            if(serial->open(QIODevice::ReadWrite) == true)
+            {
+                serial->setBaudRate(115200);
+                serial->setDataBits(QSerialPort::Data8);
+                serial->setParity(QSerialPort::NoParity);
+                serial->setStopBits(QSerialPort::OneStop);
+                serialOpened = true;
+                QString str = serial->portName() + " Opened";
+                ui->receivedtext->append(str);
+                QObject::connect(serial,&QSerialPort::readyRead,this,&MainWindow::Read_Data);
+                qDebug() << "find the serial: " << com_info.description();
+                ui->open_close->setText(tr("Close serial ") + serial->portName());
+            }
         }
     }
 }
