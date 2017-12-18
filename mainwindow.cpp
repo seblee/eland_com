@@ -43,8 +43,11 @@ typedef enum {
     ElandAliloPause,
     ElandAliloStop,
     HTTP_Get_HOST_INFO,
-    TCPConnectedELSV,
-    TCPHealthCheck,
+    TCP_CN00,
+    TCP_DV00,
+    TCP_AL00,
+    TCP_HD00,
+    TCP_HC00,
 } Eland_Status_type_t;
 
 void MainWindow::Read_Data()
@@ -85,42 +88,50 @@ void MainWindow::Read_Data()
                         //ui->receivedtext->insertPlainText(str);
                         break;
                     case TIME_SET_03:
-                        str += tr("time set \r\n");
-                        ui->receivedtext->insertPlainText(str);
+                        str += tr("time set ");
+                        ui->receivedtext->append(str);
                         break;
                     case TIME_READ_04:
-                        str += tr("time read \r\n");
-                        ui->receivedtext->insertPlainText(str);
+                        str += tr("time read ");
+                        ui->receivedtext->append(str);
                         break;
                     case ELAND_STATES_05:
                         str += tr("STATE:");
                         if(buf.at(3) == ElandBegin)
-                            str += tr("ElandBegin \r\n");
+                            str += tr("ElandBegin");
                         else if(buf.at(3) == APStatus)
-                            str += tr("StartAPStatus  \r\n");
+                            str += tr("StartAPStatus ");
                         else if(buf.at(3) == APStatusClosed)
-                            str += tr("APStatusClosed\r\n");
+                            str += tr("APStatusClosed");
                         else if(buf.at(3) == HttpServerStatus)
-                            str += tr("HttpServer Start \r\n");
+                            str += tr("HttpServer Start");
                         else if(buf.at(3) == HttpServerStop)
-                            str += tr("HttpServerStop \r\n");
+                            str += tr("HttpServerStop");
                         else if(buf.at(3) == ELAPPConnected)
-                            str += tr("ELAPPConnected \r\n");
+                            str += tr("ELAPPConnected");
                         else if(buf.at(3) == WifyConnected)
-                            str += tr("WifyConnected  \r\n");
+                            str += tr("WifyConnected ");
                         else if(buf.at(3) == WifyDisConnected)
-                            str += tr("WifyDisConnected  \r\n");
+                            str += tr("WifyDisConnected ");
                         else if(buf.at(3) == WifyConnectedFailed)
-                            str += tr("WifyFailed  \r\n");
+                            str += tr("WifyFailed ");
                         else if(buf.at(3) == HTTP_Get_HOST_INFO)
-                            str += tr("HTTP_Get_HOST_INFO  \r\n");
-                        else if(buf.at(3) == TCPConnectedELSV)
-                            str += tr("TCPConnectedELSV  \r\n");
-                        ui->receivedtext->insertPlainText(str);
+                            str += tr("HTTP_Get_HOST_INFO ");
+                        else if(buf.at(3) == TCP_CN00)
+                            str += tr("TCP_CN00 ");
+                        else if(buf.at(3) == TCP_DV00)
+                            str += tr("TCP_DV00 ");
+                        else if(buf.at(3) == TCP_AL00)
+                            str += tr("TCP_AL00 ");
+                        else if(buf.at(3) == TCP_HD00)
+                            str += tr("TCP_HD00 ");
+                        else if(buf.at(3) == TCP_HC00)
+                            str += tr("TCP_HC00 ");
+                        ui->receivedtext->append(str);
                         break;
                     case FIRM_WARE_06:
                         str += tr("firmware :") +tr((buf.data()+3)) +tr("\r\n");
-                        ui->receivedtext->insertPlainText(str);
+                        ui->receivedtext->append(str);
                         break;
                     default:
                         break;
@@ -134,7 +145,7 @@ void MainWindow::Read_Data()
                 }
 
             }
-            qDebug() << "buf.size:  " << QString::number(buf.size(),10);
+            //qDebug() << "buf.size:  " << QString::number(buf.size(),10);
         }
         else if(ui->comboBox->currentIndex() == 2)//hex輸出
         {
