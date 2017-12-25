@@ -24,9 +24,7 @@ private slots:
 
     void on_cleartext_clicked();
 
-    void on_comboBox_currentIndexChanged(int index);
-
-    void on_receivedtext_textChanged();
+    void on_comboBox_currentIndexChanged(int index);  
 
 private:
     Ui::MainWindow *ui;

@@ -5,8 +5,7 @@
 #include <QSerialPortInfo>
 #include <QMessageBox>
 
-MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     serialOpened = false;
@@ -54,135 +53,135 @@ void MainWindow::Read_Data()
 {
     static QByteArray buf;
     buf += serial->readAll();
-    if(!buf.isEmpty())
+    if (!buf.isEmpty())
     {
         ReadDataTimes++;
-        if(ui->comboBox->currentIndex() == 0)//字符
+        ui->textEdit->moveCursor(QTextCursor::End);
+        if (ui->comboBox->currentIndex() == 0) //字符
         {
-            QString str = ui->receivedtext->toPlainText();
+            QString str = ui->textEdit->toPlainText();
             str += tr(buf);
-            ui->receivedtext->clear();
-            ui->receivedtext->append(str);
+            ui->textEdit->clear();
+
+            ui->textEdit->append(str);
             buf.clear();
         }
-        else if(ui->comboBox->currentIndex() == 1)//協議
+        else if (ui->comboBox->currentIndex() == 1) //協議
         {
             while (!buf.isEmpty())
             {
-                if(buf.startsWith((char)0x55))
+                if (buf.startsWith((char)0x55))
                 {
-                    if(buf.length() < 3)
+                    if (buf.length() < 3)
                         return;
-                    else if(buf.length() < (buf.at(2) + 3))
+                    else if (buf.length() < (buf.at(2) + 3))
                         return;
-                    else if((uint8_t)buf.at(3 + buf.at(2)) != 0xaa)
+                    else if ((uint8_t)buf.at(3 + buf.at(2)) != 0xaa)
                     {
-                        buf.remove(0,1);
+                        buf.remove(0, 1);
                         continue;
                     }
                     QString str;
                     str.clear();
-                    switch (buf.at(1)) {
+                    switch (buf.at(1))
+                    {
                     case KEY_READ_02:
                         //str += tr("read key ");
                         //ui->receivedtext->insertPlainText(str);
                         break;
                     case TIME_SET_03:
                         str += tr("time set ");
-                        ui->receivedtext->append(str);
+                        ui->textEdit->append(str);
                         break;
                     case TIME_READ_04:
                         str += tr("time read ");
-                        ui->receivedtext->append(str);
+                        ui->textEdit->append(str);
                         break;
                     case ELAND_STATES_05:
                         str += tr("STATE:");
-                        if(buf.at(3) == ElandBegin)
+                        if (buf.at(3) == ElandBegin)
                             str += tr("ElandBegin");
-                        else if(buf.at(3) == APStatus)
+                        else if (buf.at(3) == APStatus)
                             str += tr("StartAPStatus ");
-                        else if(buf.at(3) == APStatusClosed)
+                        else if (buf.at(3) == APStatusClosed)
                             str += tr("APStatusClosed");
-                        else if(buf.at(3) == HttpServerStatus)
+                        else if (buf.at(3) == HttpServerStatus)
                             str += tr("HttpServer Start");
-                        else if(buf.at(3) == HttpServerStop)
+                        else if (buf.at(3) == HttpServerStop)
                             str += tr("HttpServerStop");
-                        else if(buf.at(3) == ELAPPConnected)
+                        else if (buf.at(3) == ELAPPConnected)
                             str += tr("ELAPPConnected");
-                        else if(buf.at(3) == WifyConnected)
+                        else if (buf.at(3) == WifyConnected)
                             str += tr("WifyConnected ");
-                        else if(buf.at(3) == WifyDisConnected)
+                        else if (buf.at(3) == WifyDisConnected)
                             str += tr("WifyDisConnected ");
-                        else if(buf.at(3) == WifyConnectedFailed)
+                        else if (buf.at(3) == WifyConnectedFailed)
                             str += tr("WifyFailed ");
-                        else if(buf.at(3) == HTTP_Get_HOST_INFO)
+                        else if (buf.at(3) == HTTP_Get_HOST_INFO)
                             str += tr("HTTP_Get_HOST_INFO ");
-                        else if(buf.at(3) == TCP_CN00)
+                        else if (buf.at(3) == TCP_CN00)
                             str += tr("TCP_CN00 ");
-                        else if(buf.at(3) == TCP_DV00)
+                        else if (buf.at(3) == TCP_DV00)
                             str += tr("TCP_DV00 ");
-                        else if(buf.at(3) == TCP_AL00)
+                        else if (buf.at(3) == TCP_AL00)
                             str += tr("TCP_AL00 ");
-                        else if(buf.at(3) == TCP_HD00)
+                        else if (buf.at(3) == TCP_HD00)
                             str += tr("TCP_HD00 ");
-                        else if(buf.at(3) == TCP_HC00)
+                        else if (buf.at(3) == TCP_HC00)
                             str += tr("TCP_HC00 ");
-                        ui->receivedtext->append(str);
+                        ui->textEdit->append(str);
                         break;
                     case FIRM_WARE_06:
-                        str += tr("firmware :") +tr((buf.data()+3)) +tr("\r\n");
-                        ui->receivedtext->append(str);
+                        str += tr("firmware :") + tr((buf.data() + 3)) + tr("\r\n");
+                        ui->textEdit->append(str);
                         break;
                     default:
                         break;
                     }
-                    buf.remove(0,4 + buf.at(2));
+                    buf.remove(0, 4 + buf.at(2));
                     continue;
                 }
                 else
                 {
-                    buf.remove(0,1);
+                    buf.remove(0, 1);
                 }
-
             }
             //qDebug() << "buf.size:  " << QString::number(buf.size(),10);
         }
-        else if(ui->comboBox->currentIndex() == 2)//hex輸出
+        else if (ui->comboBox->currentIndex() == 2) //hex輸出
         {
             QString str;
-            for(int i = 0;i < buf.size();i++)
+            for (int i = 0; i < buf.size(); i++)
             {
                 //str.setNum()
-                if((buf.at(i) < 0x10)&&(buf.at(i) >= 0))
+                if ((buf.at(i) < 0x10) && (buf.at(i) >= 0))
                     str += tr("0");
 
-                str += QString::number(buf.at(i)&0xFF,16) + tr(" ");
+                str += QString::number(buf.at(i) & 0xFF, 16) + tr(" ");
             }
-            ui->receivedtext->insertPlainText(str);
+            ui->textEdit->append(str);
             buf.clear();
         }
-
     }
-
 }
 void MainWindow::handleError(QSerialPort::SerialPortError error)
 {
-    qDebug() << "SerialPortError " << QString::number(error,10);
-    if(error == QSerialPort::ResourceError)
+    qDebug() << "SerialPortError " << QString::number(error, 10);
+    if (error == QSerialPort::ResourceError)
     {
-        QMessageBox::critical(this,tr("Critical Error"),serial->errorString());
+        QMessageBox::critical(this, tr("Critical Error"), serial->errorString());
         closeserial();
     }
-    else if(error == QSerialPort::PermissionError)
+    else if (error == QSerialPort::PermissionError)
     {
-        QMessageBox::critical(this,tr("Critical Error"),tr("\r\nThe serial has been already opened\r\nPlease Check"));
+        QMessageBox::critical(this, tr("Critical Error"), tr("\r\nThe serial has been already opened\r\nPlease Check"));
         //closeserial();
     }
 }
 
 void MainWindow::on_open_close_clicked()
 {
-    if(serialOpened == false)
+    if (serialOpened == false)
     {
         openserial();
     }
@@ -190,19 +189,17 @@ void MainWindow::on_open_close_clicked()
         closeserial();
 }
 
-
-
 void MainWindow::openserial()
 {
     foreach (const QSerialPortInfo &com_info, QSerialPortInfo::availablePorts())
     {
-        if(com_info.description()=="USB Serial Port")
+        if (com_info.description() == "USB Serial Port")
         {
             serial = new QSerialPort;
-            connect(serial, static_cast<void (QSerialPort::*)(QSerialPort::SerialPortError)>(&QSerialPort::error), this, &MainWindow::handleError);    //连接槽，串口出现问题连接到错误处理函数
+            connect(serial, static_cast<void (QSerialPort::*)(QSerialPort::SerialPortError)>(&QSerialPort::error), this, &MainWindow::handleError); //连接槽，串口出现问题连接到错误处理函数
 
             serial->setPortName(com_info.portName());
-            if(serial->open(QIODevice::ReadWrite) == true)
+            if (serial->open(QIODevice::ReadWrite) == true)
             {
                 serial->setBaudRate(115200);
                 serial->setDataBits(QSerialPort::Data8);
@@ -210,8 +207,8 @@ void MainWindow::openserial()
                 serial->setStopBits(QSerialPort::OneStop);
                 serialOpened = true;
                 QString str = serial->portName() + " Opened";
-                ui->receivedtext->append(str);
-                QObject::connect(serial,&QSerialPort::readyRead,this,&MainWindow::Read_Data);
+                ui->textEdit->append(str);
+                QObject::connect(serial, &QSerialPort::readyRead, this, &MainWindow::Read_Data);
                 qDebug() << "find the serial: " << com_info.description();
                 ui->open_close->setText(tr("Close serial ") + serial->portName());
             }
@@ -227,24 +224,19 @@ void MainWindow::closeserial()
     serial->deleteLater();
     serialOpened = false;
 
-    ui->receivedtext->append(str);
+    ui->textEdit->append(str);
     ui->open_close->setText(tr("Open serial"));
 }
 
 void MainWindow::on_cleartext_clicked()
 {
-    ui->receivedtext->clear();
+    ui->textEdit->clear();
 }
 
 void MainWindow::on_comboBox_currentIndexChanged(int index)
 {
-    QString str = QString::number(index,10);
-    qDebug() <<  "currentIndex:%d" <<  str   ;
+    QString str = QString::number(index, 10);
+    qDebug() << "currentIndex:%d" << str;
 }
 
-void MainWindow::on_receivedtext_textChanged()
-{
-    QTextCursor cursor = ui->receivedtext->textCursor();
-    ui->receivedtext->moveCursor(QTextCursor::End);
-    ui->receivedtext->setTextCursor(cursor);
-}
+

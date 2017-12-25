@@ -31,25 +31,19 @@
     <item>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="QTextBrowser" name="receivedtext">
+       <widget class="QTextEdit" name="textEdit">
         <property name="font">
          <font>
+          <family>Arial</family>
           <pointsize>12</pointsize>
          </font>
         </property>
-        <property name="mouseTracking">
-         <bool>true</bool>
-        </property>
-        <property name="focusPolicy">
-         <enum>Qt::NoFocus</enum>
-        </property>
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
         <property name="styleSheet">
-         <string notr="true">selection-color: rgb(244, 123, 255);
-color: rgb(85, 255, 255);
-background-color: rgb(59, 59, 59);</string>
+         <string notr="true">color: rgb(85, 255, 255);
+background-color: rgb(59, 59, 59);
+selection-color: rgb(170, 255, 255);
+selection-background-color: rgb(170, 0, 255);
+</string>
         </property>
         <property name="verticalScrollBarPolicy">
          <enum>Qt::ScrollBarAlwaysOn</enum>
@@ -57,11 +51,8 @@ background-color: rgb(59, 59, 59);</string>
         <property name="horizontalScrollBarPolicy">
          <enum>Qt::ScrollBarAlwaysOff</enum>
         </property>
-        <property name="lineWrapMode">
-         <enum>QTextEdit::WidgetWidth</enum>
-        </property>
-        <property name="textInteractionFlags">
-         <set>Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse|Qt::TextBrowserInteraction|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+        <property name="readOnly">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
