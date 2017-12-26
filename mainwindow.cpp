@@ -56,9 +56,9 @@ void MainWindow::Read_Data()
     if (!buf.isEmpty())
     {
         ReadDataTimes++;
-        ui->textEdit->moveCursor(QTextCursor::End);
         if (ui->comboBox->currentIndex() == 0) //字符
         {
+            ui->textEdit->moveCursor(QTextCursor::End);
             QString str = ui->textEdit->toPlainText();
             str += tr(buf);
             ui->textEdit->clear();
@@ -91,10 +91,12 @@ void MainWindow::Read_Data()
                         break;
                     case TIME_SET_03:
                         str += tr("time set ");
+                        ui->textEdit->moveCursor(QTextCursor::End);
                         ui->textEdit->append(str);
                         break;
                     case TIME_READ_04:
                         str += tr("time read ");
+                        ui->textEdit->moveCursor(QTextCursor::End);
                         ui->textEdit->append(str);
                         break;
                     case ELAND_STATES_05:
@@ -129,10 +131,12 @@ void MainWindow::Read_Data()
                             str += tr("TCP_HD00 ");
                         else if (buf.at(3) == TCP_HC00)
                             str += tr("TCP_HC00 ");
+                        ui->textEdit->moveCursor(QTextCursor::End);
                         ui->textEdit->append(str);
                         break;
                     case FIRM_WARE_06:
-                        str += tr("firmware :") + tr((buf.data() + 3)) + tr("\r\n");
+                        str += tr("firmware :") + tr((buf.data() + 3));
+                        ui->textEdit->moveCursor(QTextCursor::End);
                         ui->textEdit->append(str);
                         break;
                     default:
@@ -159,7 +163,8 @@ void MainWindow::Read_Data()
 
                 str += QString::number(buf.at(i) & 0xFF, 16) + tr(" ");
             }
-            ui->textEdit->append(str);
+            ui->textEdit->moveCursor(QTextCursor::End);
+            ui->textEdit->insertPlainText(str);
             buf.clear();
         }
     }
