@@ -17,7 +17,7 @@
    <bool>false</bool>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Eland_COM</string>
   </property>
   <property name="windowIcon">
    <iconset resource="resource.qrc">

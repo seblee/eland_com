@@ -48,3 +48,4 @@ target_wrapper.*
 CMakeLists.txt.user*
 
 /debug
+/output/additional.zip
