@@ -24,7 +24,9 @@ typedef enum {
     TIME_SET_03,
     TIME_READ_04,
     ELAND_STATES_05,
-    FIRM_WARE_06,
+    SEAD_FIRM_WARE_06,
+    REND_FIRM_WARE_07,
+    SEND_LINK_STATE_08,
 } __msg_function_t;
 
 typedef enum {
@@ -52,6 +54,8 @@ typedef enum {
 void MainWindow::Read_Data()
 {
     static QByteArray buf;
+    int32_t RSSI = 0;
+    int32_t memCache=0;
     buf += serial->readAll();
     if (!buf.isEmpty())
     {
@@ -86,8 +90,16 @@ void MainWindow::Read_Data()
                     switch (buf.at(1))
                     {
                     case KEY_READ_02:
-                        //str += tr("read key ");
-                        //ui->receivedtext->insertPlainText(str);
+                        if(buf.at(2)>5){
+                            str += tr("READ_KEY####");
+                            memcpy(&memCache,buf.data() + 3,4);
+                            str += tr(" num_of_chunks:") + QString::number(memCache, 10);
+                            memcpy(&memCache,buf.data() + 7,4);
+                            str += tr(" free_memory:") + QString::number(memCache, 10);
+                            qDebug() << "num_of_chunks = " << QString::number(*(int*)(buf.data() + 3), 10)<< "free_memory = " << QString::number(*(int*)(buf.data() + 7), 10);
+                            ui->textEdit->moveCursor(QTextCursor::End);
+                            ui->textEdit->append(str);
+                        }
                         break;
                     case TIME_SET_03:
                         str += tr("time set ");
@@ -134,8 +146,23 @@ void MainWindow::Read_Data()
                         ui->textEdit->moveCursor(QTextCursor::End);
                         ui->textEdit->append(str);
                         break;
-                    case FIRM_WARE_06:
+                    case SEAD_FIRM_WARE_06:
                         str += tr("firmware :") + tr((buf.data() + 3));
+                        ui->textEdit->moveCursor(QTextCursor::End);
+                        ui->textEdit->append(str);
+                        break;
+                    case REND_FIRM_WARE_07:
+                        str += tr("firmware :");
+                        if(buf.at(2) > 0)
+                            str += tr((buf.data() + 3));
+                        ui->textEdit->moveCursor(QTextCursor::End);
+                        ui->textEdit->append(str);
+                        break;
+                    case SEND_LINK_STATE_08:
+
+                        memcpy(&RSSI,(buf.data() + 3),4);
+                        qDebug() << "RSSI = " << QString::number(RSSI, 10);
+                        str += tr("RSSI :") + QString::number(RSSI, 10);
                         ui->textEdit->moveCursor(QTextCursor::End);
                         ui->textEdit->append(str);
                         break;
