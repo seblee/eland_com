@@ -10,24 +10,34 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
 {
     serialOpened = false;
     ReadDataTimes = 0;
+    setWindowFlags(Qt::WindowStaysOnTopHint);
     ui->setupUi(this);
 }
-
 MainWindow::~MainWindow()
 {
     delete ui;
 }
 
 typedef enum {
-    KEY_FUN_NONE = 0x00, /*空命令*/
-    KEY_READ_02 = 0X02,
-    TIME_SET_03,
-    TIME_READ_04,
-    ELAND_STATES_05,
-    SEAD_FIRM_WARE_06,
-    REND_FIRM_WARE_07,
-    SEND_LINK_STATE_08,
+    KEY_FUN_NONE = 0x00, /* 空命令*/
+    KEY_READ_02 = 0X02,  /* READ MCU KEY STATE*/
+    TIME_SET_03,         /* SEND ELAND TIME*/
+    TIME_READ_04,        /* READ MCU TIME*/
+    ELAND_STATES_05,     /* SEND ELAND STATES*/
+    SEND_FIRM_WARE_06,   /* SEND ELAND FIRMWARE VERSION*/
+    REND_FIRM_WARE_07,   /* READ MUC FIRMWARE VERSION*/
+    SEND_LINK_STATE_08,  /* SEND WIFI LINK STATE*/
+    MCU_FIRM_WARE_09,    /* START MCU FIRM WARE UPDATE*/
+    ALARM_READ_10,       /* READ MCU ALARM*/
+    ALARM_SEND_11,       /* SEND NEXT ALARM STATE*/
 } __msg_function_t;
+
+typedef enum {
+    REFRESH_NONE = 0,
+    REFRESH_TIME,
+    REFRESH_ALARM,
+    REFRESH_MAX,
+} MCU_Refresh_type_t;
 
 typedef enum {
     ElandNone = 0,
@@ -51,10 +61,18 @@ typedef enum {
     TCP_HC00,
 } Eland_Status_type_t;
 
+typedef enum {
+    LEVEL0 = (uint8_t)0x00,
+    LEVEL1 = (uint8_t)0x08,
+    LEVEL2 = (uint8_t)0x0C,
+    LEVEL3 = (uint8_t)0x0E,
+    LEVEL4 = (uint8_t)0x0F,
+    LEVELNUM = (uint8_t)0xFF,
+} LCD_Wifi_Rssi_t;
+
 void MainWindow::Read_Data()
 {
     static QByteArray buf;
-    int32_t RSSI = 0;
     int32_t memCache=0;
     buf += serial->readAll();
     if (!buf.isEmpty())
@@ -66,7 +84,6 @@ void MainWindow::Read_Data()
             QString str = ui->textEdit->toPlainText();
             str += tr(buf);
             ui->textEdit->clear();
-
             ui->textEdit->append(str);
             buf.clear();
         }
@@ -146,7 +163,7 @@ void MainWindow::Read_Data()
                         ui->textEdit->moveCursor(QTextCursor::End);
                         ui->textEdit->append(str);
                         break;
-                    case SEAD_FIRM_WARE_06:
+                    case SEND_FIRM_WARE_06:
                         str += tr("firmware :") + tr((buf.data() + 3));
                         ui->textEdit->moveCursor(QTextCursor::End);
                         ui->textEdit->append(str);
@@ -159,10 +176,20 @@ void MainWindow::Read_Data()
                         ui->textEdit->append(str);
                         break;
                     case SEND_LINK_STATE_08:
-
-                        memcpy(&RSSI,(buf.data() + 3),4);
-                        qDebug() << "RSSI = " << QString::number(RSSI, 10);
-                        str += tr("RSSI :") + QString::number(RSSI, 10);
+                        switch (LCD_Wifi_Rssi_t(buf.at(3))) {
+                        case LEVEL0: str += tr("RSSI :") + tr("LEVEL0"); break;
+                        case LEVEL1: str += tr("RSSI :") + tr("LEVEL1"); break;
+                        case LEVEL2: str += tr("RSSI :") + tr("LEVEL2"); break;
+                        case LEVEL3: str += tr("RSSI :") + tr("LEVEL3");break;
+                        case LEVEL4: str += tr("RSSI :") + tr("LEVEL4");break;
+                        case LEVELNUM: str += tr("RSSI :") + tr("LEVELNUM");break;
+                        default:str += tr("RSSI :") + tr("default");break;
+                        }
+                        ui->textEdit->moveCursor(QTextCursor::End);
+                        ui->textEdit->append(str);
+                        break;
+                    case ALARM_READ_10:
+                        str += tr("ALARM_READ_10");
                         ui->textEdit->moveCursor(QTextCursor::End);
                         ui->textEdit->append(str);
                         break;
@@ -184,7 +211,6 @@ void MainWindow::Read_Data()
             QString str;
             for (int i = 0; i < buf.size(); i++)
             {
-                //str.setNum()
                 if ((buf.at(i) < 0x10) && (buf.at(i) >= 0))
                     str += tr("0");
 
