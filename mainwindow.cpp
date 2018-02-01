@@ -6,7 +6,7 @@
 #include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
-    ui(new Ui::MainWindow)
+                                          ui(new Ui::MainWindow)
 {
     serialOpened = false;
     ReadDataTimes = 0;
@@ -42,17 +42,15 @@ typedef enum {
 typedef enum {
     ElandNone = 0,
     ElandBegin,
-    APStatus,
+    APStatusStart,
     APStatusClosed,
-    HttpServerStatus,
+    APServerStart,
     HttpServerStop,
     ELAPPConnected,
     WifyConnected,
     WifyDisConnected,
     WifyConnectedFailed,
-    ElandAliloPlay,
-    ElandAliloPause,
-    ElandAliloStop,
+    CONNECTED_NET,
     HTTP_Get_HOST_INFO,
     TCP_CN00,
     TCP_DV00,
@@ -69,11 +67,18 @@ typedef enum {
     LEVEL4 = (uint8_t)0x0F,
     LEVELNUM = (uint8_t)0xFF,
 } LCD_Wifi_Rssi_t;
-
+typedef enum _eland_mode {
+    ELAND_MODE_NONE = (uint8_t)0x00,
+    ELAND_CLOCK_MON,
+    ELAND_CLOCK_ALARM,
+    ELAND_NC,
+    ELAND_NA,
+    ELAND_MODE_MAX,
+} _ELAND_MODE_t;
 void MainWindow::Read_Data()
 {
     static QByteArray buf;
-    int32_t memCache=0;
+    int32_t memCache = 0;
     buf += serial->readAll();
     if (!buf.isEmpty())
     {
@@ -107,13 +112,14 @@ void MainWindow::Read_Data()
                     switch (buf.at(1))
                     {
                     case KEY_READ_02:
-                        if(buf.at(2)>5){
+                        if (buf.at(2) > 5)
+                        {
                             str += tr("READ_KEY####");
-                            memcpy(&memCache,buf.data() + 3,4);
+                            memcpy(&memCache, buf.data() + 3, 4);
                             str += tr(" num_of_chunks:") + QString::number(memCache, 10);
-                            memcpy(&memCache,buf.data() + 7,4);
+                            memcpy(&memCache, buf.data() + 7, 4);
                             str += tr(" free_memory:") + QString::number(memCache, 10);
-                            qDebug() << "num_of_chunks = " << QString::number(*(int*)(buf.data() + 3), 10)<< "free_memory = " << QString::number(*(int*)(buf.data() + 7), 10);
+                            qDebug() << "num_of_chunks = " << QString::number(*(int *)(buf.data() + 3), 10) << "free_memory = " << QString::number(*(int *)(buf.data() + 7), 10);
                             ui->textEdit->moveCursor(QTextCursor::End);
                             ui->textEdit->append(str);
                         }
@@ -132,11 +138,11 @@ void MainWindow::Read_Data()
                         str += tr("STATE:");
                         if (buf.at(3) == ElandBegin)
                             str += tr("ElandBegin");
-                        else if (buf.at(3) == APStatus)
+                        else if (buf.at(3) == APStatusStart)
                             str += tr("StartAPStatus ");
                         else if (buf.at(3) == APStatusClosed)
                             str += tr("APStatusClosed");
-                        else if (buf.at(3) == HttpServerStatus)
+                        else if (buf.at(3) == APServerStart)
                             str += tr("HttpServer Start");
                         else if (buf.at(3) == HttpServerStop)
                             str += tr("HttpServerStop");
@@ -170,21 +176,63 @@ void MainWindow::Read_Data()
                         break;
                     case REND_FIRM_WARE_07:
                         str += tr("firmware :");
-                        if(buf.at(2) > 0)
+                        if (buf.at(2) > 0)
                             str += tr((buf.data() + 3));
                         ui->textEdit->moveCursor(QTextCursor::End);
                         ui->textEdit->append(str);
                         break;
                     case SEND_LINK_STATE_08:
-                        switch (LCD_Wifi_Rssi_t(buf.at(3))) {
-                        case LEVEL0: str += tr("RSSI :") + tr("LEVEL0"); break;
-                        case LEVEL1: str += tr("RSSI :") + tr("LEVEL1"); break;
-                        case LEVEL2: str += tr("RSSI :") + tr("LEVEL2"); break;
-                        case LEVEL3: str += tr("RSSI :") + tr("LEVEL3");break;
-                        case LEVEL4: str += tr("RSSI :") + tr("LEVEL4");break;
-                        case LEVELNUM: str += tr("RSSI :") + tr("LEVELNUM");break;
-                        default:str += tr("RSSI :") + tr("default");break;
+                        switch ((LCD_Wifi_Rssi_t)(buf.at(3)))
+                        {
+                        case LEVEL0:
+                            str += tr("LEVEL0");
+                            break;
+                        case LEVEL1:
+                            str += tr("LEVEL1");
+                            break;
+                        case LEVEL2:
+                            str += tr("LEVEL2");
+                            break;
+                        case LEVEL3:
+                            str += tr("LEVEL3");
+                            break;
+                        case LEVEL4:
+                            str += tr("LEVEL4");
+                            break;
+                        case LEVELNUM:
+                            str += tr("LEVELNUM");
+                            break;
+                        default:
+                            str += tr("default");
+                            break;
                         }
+                        switch ((_ELAND_MODE_t)buf.at(4))
+                        {
+                        case ELAND_MODE_NONE:
+                            str += tr(" NONE");
+                            break;
+                        case ELAND_CLOCK_MON:
+                            str += tr(" CLOCK_MON");
+                            break;
+                        case ELAND_CLOCK_ALARM:
+                            str += tr(" CLOCK_ALARM");
+                            break;
+                        case ELAND_NC:
+                            str += tr(" NC");
+                            break;
+                        case ELAND_NA:
+                            str += tr(" NA");
+                            break;
+                        case ELAND_MODE_MAX:
+                            str += tr(" MODE_MAX");
+                            break;
+                        default:
+                            str += tr(" default");
+                            break;
+                        }
+                        str += tr(" E_MODE:") + QString::number(buf.at(4), 10);
+                        str += tr(" state:") + QString::number(buf.at(5), 10);
+                        qDebug() << "data" << QString::number(buf.at(3), 10) << QString::number(buf.at(4), 10) << QString::number(buf.at(5), 10);
                         ui->textEdit->moveCursor(QTextCursor::End);
                         ui->textEdit->append(str);
                         break;
@@ -296,5 +344,3 @@ void MainWindow::on_comboBox_currentIndexChanged(int index)
     QString str = QString::number(index, 10);
     qDebug() << "currentIndex:%d" << str;
 }
-
-
