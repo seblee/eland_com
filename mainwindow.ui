@@ -87,7 +87,10 @@ p, li { white-space: pre-wrap; }
            <bool>false</bool>
           </property>
           <property name="text">
-           <string>Open Serial</string>
+           <string>Open serial</string>
+          </property>
+          <property name="shortcut">
+           <string>Alt+S</string>
           </property>
          </widget>
         </item>
@@ -109,6 +112,9 @@ p, li { white-space: pre-wrap; }
           </property>
           <property name="text">
            <string>Clear Text</string>
+          </property>
+          <property name="shortcut">
+           <string>Esc</string>
           </property>
          </widget>
         </item>

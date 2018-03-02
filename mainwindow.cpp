@@ -10,7 +10,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
 {
     serialOpened = false;
     ReadDataTimes = 0;
+    hide();
     setWindowFlags(Qt::WindowStaysOnTopHint);
+    show();
     ui->setupUi(this);
 }
 MainWindow::~MainWindow()
@@ -28,8 +30,10 @@ typedef enum {
     REND_FIRM_WARE_07,   /* READ MUC FIRMWARE VERSION*/
     SEND_LINK_STATE_08,  /* SEND WIFI LINK STATE*/
     MCU_FIRM_WARE_09,    /* START MCU FIRM WARE UPDATE*/
-    ALARM_READ_10,       /* READ MCU ALARM*/
-    ALARM_SEND_11,       /* SEND NEXT ALARM STATE*/
+    ALARM_READ_0A,       /* READ MCU ALARM*/
+    ALARM_SEND_0B,       /* SEND NEXT ALARM STATE*/
+    ELAND_DATA_0C,       /* SEND ELAND DATA TO MCU*/
+    ELAND_RESET_0D,      /* RESET SYSTEM */
 } __msg_function_t;
 
 typedef enum {
@@ -50,9 +54,9 @@ typedef enum {
     WifyConnected,
     WifyDisConnected,
     WifyConnectedFailed,
-    CONNECTED_NET,
     HTTP_Get_HOST_INFO,
     TCP_CN00,
+    CONNECTED_NET,
     TCP_DV00,
     TCP_AL00,
     TCP_HD00,
@@ -236,8 +240,23 @@ void MainWindow::Read_Data()
                         ui->textEdit->moveCursor(QTextCursor::End);
                         ui->textEdit->append(str);
                         break;
-                    case ALARM_READ_10:
-                        str += tr("ALARM_READ_10");
+                    case ALARM_READ_0A:
+                        str += tr("ALARM_READ_0A");
+                        ui->textEdit->moveCursor(QTextCursor::End);
+                        ui->textEdit->append(str);
+                        break;
+                    case ALARM_SEND_0B:
+                        str += tr("ALARM_SEND_0B");
+                        ui->textEdit->moveCursor(QTextCursor::End);
+                        ui->textEdit->append(str);
+                        break;
+                    case ELAND_DATA_0C:
+                        str += tr("ELAND_DATA_0C");
+                        ui->textEdit->moveCursor(QTextCursor::End);
+                        ui->textEdit->append(str);
+                        break;
+                    case ELAND_RESET_0D:
+                        str += tr("ELAND_RESET_0D");
                         ui->textEdit->moveCursor(QTextCursor::End);
                         ui->textEdit->append(str);
                         break;
@@ -287,6 +306,7 @@ void MainWindow::handleError(QSerialPort::SerialPortError error)
 
 void MainWindow::on_open_close_clicked()
 {
+    //setWindowFlags(Qt::WindowStaysOnTopHint);
     if (serialOpened == false)
     {
         openserial();
@@ -316,7 +336,7 @@ void MainWindow::openserial()
                 ui->textEdit->append(str);
                 QObject::connect(serial, &QSerialPort::readyRead, this, &MainWindow::Read_Data);
                 qDebug() << "find the serial: " << com_info.description();
-                ui->open_close->setText(tr("Close serial ") + serial->portName());
+                ui->open_close->setText(tr("Close &Serial ") + serial->portName());
             }
         }
     }
@@ -331,7 +351,7 @@ void MainWindow::closeserial()
     serialOpened = false;
 
     ui->textEdit->append(str);
-    ui->open_close->setText(tr("Open serial"));
+    ui->open_close->setText(tr("Open &Serial"));
 }
 
 void MainWindow::on_cleartext_clicked()
