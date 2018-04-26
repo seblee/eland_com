@@ -6,7 +6,7 @@
 #include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
-                                          ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow)
 {
     serialOpened = false;
     ReadDataTimes = 0;
@@ -22,7 +22,8 @@ MainWindow::~MainWindow()
 
 typedef enum {
     KEY_FUN_NONE = 0x00, /* 空命令*/
-    KEY_READ_02 = 0X02,  /* READ MCU KEY STATE*/
+    SEND_ELAND_ERR_01,   /* SEND ELAND ERROR CODE*/
+    KEY_READ_02,         /* READ MCU KEY STATE*/
     TIME_SET_03,         /* SEND ELAND TIME*/
     TIME_READ_04,        /* READ MCU TIME*/
     ELAND_STATES_05,     /* SEND ELAND STATES*/
@@ -34,7 +35,15 @@ typedef enum {
     ALARM_SEND_0B,       /* SEND NEXT ALARM STATE*/
     ELAND_DATA_0C,       /* SEND ELAND DATA TO MCU*/
     ELAND_RESET_0D,      /* RESET SYSTEM */
+    ELAND_DELETE_0E,     /* DEVICE DATA DELETE */
 } __msg_function_t;
+
+typedef enum {
+    EL_ERROR_NONE = 0x00, /*error none */
+    EL_HTTP_TIMEOUT,      /*http time out*/
+    EL_HTTP_204,          /*http 204*/
+    EL_HTTP_400,          /*http 400*/
+} __eland_error_t;
 
 typedef enum {
     REFRESH_NONE = 0,
@@ -115,6 +124,30 @@ void MainWindow::Read_Data()
                     str.clear();
                     switch (buf.at(1))
                     {
+                    case SEND_ELAND_ERR_01:
+                    {
+                        qDebug() << "SEND_ELAND_ERR_01"    ;
+                        switch (buf.at(3)) {
+                        case EL_ERROR_NONE : /*error none */
+                            str += tr("ERROR_NONE ");
+                            break;
+                        case EL_HTTP_TIMEOUT:      /*http time out*/
+                            str += tr("EL_HTTP_TIMEOUT ");
+                            break;
+                        case EL_HTTP_204:         /*http 204*/
+                            str += tr("EL_HTTP_204 ");
+                            break;
+                        case EL_HTTP_400:         /*http 400*/
+                            str += tr("EL_HTTP_400 ");
+                            break;
+                        default:
+                            str += tr("ERROR_NONE ");
+                            break;
+                        }
+                    }
+                        ui->textEdit->moveCursor(QTextCursor::End);
+                        ui->textEdit->append(str);
+                        break;
                     case KEY_READ_02:
                         if (buf.at(2) > 5)
                         {
@@ -260,6 +293,11 @@ void MainWindow::Read_Data()
                         ui->textEdit->moveCursor(QTextCursor::End);
                         ui->textEdit->append(str);
                         break;
+                    case ELAND_DELETE_0E:
+                        str += tr("ELAND_DELETE_0E");
+                        ui->textEdit->moveCursor(QTextCursor::End);
+                        ui->textEdit->append(str);
+                        break;
                     default:
                         break;
                     }
@@ -336,7 +374,8 @@ void MainWindow::openserial()
                 ui->textEdit->append(str);
                 QObject::connect(serial, &QSerialPort::readyRead, this, &MainWindow::Read_Data);
                 qDebug() << "find the serial: " << com_info.description();
-                ui->open_close->setText(tr("Close &Serial ") + serial->portName());
+                ui->open_close->setText(tr("Close Serial ") + serial->portName());
+                ui->open_close->setShortcut(tr("S"));
             }
         }
     }
@@ -351,16 +390,32 @@ void MainWindow::closeserial()
     serialOpened = false;
 
     ui->textEdit->append(str);
-    ui->open_close->setText(tr("Open &Serial"));
+    ui->open_close->setText(tr("Open Serial"));
+    ui->open_close->setShortcut(tr("S"));
 }
 
-void MainWindow::on_cleartext_clicked()
+void MainWindow::keyPressEvent(QKeyEvent *event)
 {
-    ui->textEdit->clear();
+    if(event->key() == Qt::Key_Escape)
+    {
+        on_open_close_clicked();
+        this->close();
+    }
 }
+
 
 void MainWindow::on_comboBox_currentIndexChanged(int index)
 {
     QString str = QString::number(index, 10);
     qDebug() << "currentIndex:%d" << str;
+}
+
+void MainWindow::on_Connect_clicked()
+{
+    tcp_ssl *tcp_dialog = new tcp_ssl;
+    hide();
+    setWindowFlag(Qt::WindowStaysOnTopHint,false);
+    show();
+    tcp_dialog->setAttribute(Qt::WA_QuitOnClose,false);
+    tcp_dialog->show();
 }

@@ -71,6 +71,22 @@ p, li { white-space: pre-wrap; }
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
+         <widget class="QPushButton" name="Connect">
+          <property name="font">
+           <font>
+            <family>Arial</family>
+            <pointsize>20</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>TCP/IP</string>
+          </property>
+          <property name="shortcut">
+           <string>T</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QPushButton" name="open_close">
           <property name="minimumSize">
            <size>
@@ -80,6 +96,7 @@ p, li { white-space: pre-wrap; }
           </property>
           <property name="font">
            <font>
+            <family>Arial</family>
             <pointsize>20</pointsize>
            </font>
           </property>
@@ -87,10 +104,7 @@ p, li { white-space: pre-wrap; }
            <bool>false</bool>
           </property>
           <property name="text">
-           <string>Open serial</string>
-          </property>
-          <property name="shortcut">
-           <string>Alt+S</string>
+           <string>Open Serial</string>
           </property>
          </widget>
         </item>
@@ -104,6 +118,7 @@ p, li { white-space: pre-wrap; }
           </property>
           <property name="font">
            <font>
+            <family>Arial</family>
             <pointsize>20</pointsize>
            </font>
           </property>
@@ -114,7 +129,7 @@ p, li { white-space: pre-wrap; }
            <string>Clear Text</string>
           </property>
           <property name="shortcut">
-           <string>Esc</string>
+           <string>C</string>
           </property>
          </widget>
         </item>
@@ -128,6 +143,7 @@ p, li { white-space: pre-wrap; }
           </property>
           <property name="font">
            <font>
+            <family>Arial</family>
             <pointsize>20</pointsize>
            </font>
           </property>
@@ -160,7 +176,7 @@ p, li { white-space: pre-wrap; }
      <x>0</x>
      <y>0</y>
      <width>1020</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>
@@ -174,8 +190,32 @@ p, li { white-space: pre-wrap; }
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <tabstops>
+  <tabstop>textEdit</tabstop>
+  <tabstop>open_close</tabstop>
+  <tabstop>Connect</tabstop>
+  <tabstop>cleartext</tabstop>
+  <tabstop>comboBox</tabstop>
+ </tabstops>
  <resources>
   <include location="resource.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>cleartext</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>textEdit</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>682</x>
+     <y>572</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>616</x>
+     <y>451</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
