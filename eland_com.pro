@@ -5,7 +5,8 @@
 #-------------------------------------------------
 
 QT       += core gui \
-            serialport
+            serialport \
+            network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -26,13 +27,16 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+    tcp_ssl.cpp
 
 HEADERS += \
-        mainwindow.h
+        mainwindow.h \
+    tcp_ssl.h
 
 FORMS += \
-        mainwindow.ui
+        mainwindow.ui \
+    tcp_ssl.ui
 #CONFIG += debug
 
 DISTFILES +=
