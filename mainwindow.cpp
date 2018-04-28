@@ -43,6 +43,9 @@ typedef enum {
     EL_HTTP_TIMEOUT,      /*http time out*/
     EL_HTTP_204,          /*http 204*/
     EL_HTTP_400,          /*http 400*/
+    EL_HTTP_OTHER,        /*http other error*/
+    EL_FLASH_READ,        /*flash read error*/
+    EL_AUDIO_PLAY         /*audio play error*/
 } __eland_error_t;
 
 typedef enum {
@@ -140,8 +143,17 @@ void MainWindow::Read_Data()
                         case EL_HTTP_400:         /*http 400*/
                             str += tr("EL_HTTP_400 ");
                             break;
+                        case EL_HTTP_OTHER :        /*http other error*/
+                            str += tr("EL_HTTP_OTHER ");
+                            break;
+                        case EL_FLASH_READ :        /*flash read error*/
+                            str += tr("FLASH_READ ERROR");
+                            break;
+                        case EL_AUDIO_PLAY :        /*audio play error*/
+                            str += tr("AUDIO_PLAY ERROR");
+                            break;
                         default:
-                            str += tr("ERROR_NONE ");
+                            str += tr("ERROR_NONE");
                             break;
                         }
                     }
