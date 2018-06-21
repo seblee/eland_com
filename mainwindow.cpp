@@ -6,7 +6,7 @@
 #include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
-    ui(new Ui::MainWindow)
+                                          ui(new Ui::MainWindow)
 {
     serialOpened = false;
     ReadDataTimes = 0;
@@ -20,7 +20,8 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-typedef enum {
+typedef enum
+{
     KEY_FUN_NONE = 0x00, /* 空命令*/
     SEND_ELAND_ERR_01,   /* SEND ELAND ERROR CODE*/
     KEY_READ_02,         /* READ MCU KEY STATE*/
@@ -38,21 +39,36 @@ typedef enum {
     ELAND_DELETE_0E,     /* DEVICE DATA DELETE */
 } __msg_function_t;
 
-typedef enum {
+typedef enum
+{
+    EL_ERROR_NONE = 0x00, /*error none */
+    EL_HTTP_TIMEOUT,      /*http time out*/
+    EL_HTTP_204,          /*http 204*/
+    EL_HTTP_400,          /*http 400*/
+    EL_HTTP_OTHER,        /*http other error*/
+    EL_FLASH_READ,        /*flash read error*/
+    EL_AUDIO_PLAY,        /*audio play error*/
+    EL_MAIN_THREAD,       /*file download  error*/
+} __eland_error_t;
+
+typedef enum
+{
     EL_ERROR_NONE = 0x00, /*error none */
     EL_HTTP_TIMEOUT,      /*http time out*/
     EL_HTTP_204,          /*http 204*/
     EL_HTTP_400,          /*http 400*/
 } __eland_error_t;
 
-typedef enum {
+typedef enum
+{
     REFRESH_NONE = 0,
     REFRESH_TIME,
     REFRESH_ALARM,
     REFRESH_MAX,
 } MCU_Refresh_type_t;
 
-typedef enum {
+typedef enum
+{
     ElandNone = 0,
     ElandBegin,
     APStatusStart,
@@ -72,7 +88,8 @@ typedef enum {
     TCP_HC00,
 } Eland_Status_type_t;
 
-typedef enum {
+typedef enum
+{
     LEVEL0 = (uint8_t)0x00,
     LEVEL1 = (uint8_t)0x08,
     LEVEL2 = (uint8_t)0x0C,
@@ -80,7 +97,8 @@ typedef enum {
     LEVEL4 = (uint8_t)0x0F,
     LEVELNUM = (uint8_t)0xFF,
 } LCD_Wifi_Rssi_t;
-typedef enum _eland_mode {
+typedef enum _eland_mode
+{
     ELAND_MODE_NONE = (uint8_t)0x00,
     ELAND_CLOCK_MON,
     ELAND_CLOCK_ALARM,
@@ -126,22 +144,35 @@ void MainWindow::Read_Data()
                     {
                     case SEND_ELAND_ERR_01:
                     {
-                        qDebug() << "SEND_ELAND_ERR_01"    ;
-                        switch (buf.at(3)) {
-                        case EL_ERROR_NONE : /*error none */
+                        qDebug() << "SEND_ELAND_ERR_01";
+                        switch (buf.at(3))
+                        {
+                        case EL_ERROR_NONE: /*error none */
                             str += tr("ERROR_NONE ");
                             break;
-                        case EL_HTTP_TIMEOUT:      /*http time out*/
+                        case EL_HTTP_TIMEOUT: /*http time out*/
                             str += tr("EL_HTTP_TIMEOUT ");
                             break;
-                        case EL_HTTP_204:         /*http 204*/
+                        case EL_HTTP_204: /*http 204*/
                             str += tr("EL_HTTP_204 ");
                             break;
-                        case EL_HTTP_400:         /*http 400*/
+                        case EL_HTTP_400: /*http 400*/
                             str += tr("EL_HTTP_400 ");
                             break;
+                        case EL_HTTP_OTHER: /*http other error*/
+                            str += tr("EL_HTTP_OTHER ");
+                            break;
+                        case EL_FLASH_READ: /*flash read error*/
+                            str += tr("FLASH_READ ERROR");
+                            break;
+                        case EL_AUDIO_PLAY: /*audio play error*/
+                            str += tr("AUDIO_PLAY ERROR");
+                            break;
+                        case EL_MAIN_THREAD: /*audio play error*/
+                            str += tr("EL_MAIN_THREAD ERROR");
+                            break;
                         default:
-                            str += tr("ERROR_NONE ");
+                            str += tr("ERROR_NONE");
                             break;
                         }
                     }
@@ -162,7 +193,20 @@ void MainWindow::Read_Data()
                         }
                         break;
                     case TIME_SET_03:
-                        str += tr("time set ");
+                        str += tr("time set:");
+                        str += QString::number(*(unsigned char *)(buf.data() + 9), 10);
+                        str += tr("-");
+                        str += QString::number(*(unsigned char *)(buf.data() + 8), 10);
+                        str += tr("-");
+                        str += QString::number(*(unsigned char *)(buf.data() + 7), 10);
+                        str += tr(" ");
+                        str += QString::number(*(unsigned char *)(buf.data() + 5), 10);
+                        str += tr(":");
+                        str += QString::number(*(unsigned char *)(buf.data() + 4), 10);
+                        str += tr(":");
+                        str += QString::number(*(unsigned char *)(buf.data() + 3), 10);
+                        str += tr(" ");
+                        str += QString::number(*(unsigned char *)(buf.data() + 6), 10);
                         ui->textEdit->moveCursor(QTextCursor::End);
                         ui->textEdit->append(str);
                         break;
@@ -396,13 +440,12 @@ void MainWindow::closeserial()
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
-    if(event->key() == Qt::Key_Escape)
+    if (event->key() == Qt::Key_Escape)
     {
         on_open_close_clicked();
         this->close();
     }
 }
-
 
 void MainWindow::on_comboBox_currentIndexChanged(int index)
 {
@@ -414,8 +457,8 @@ void MainWindow::on_Connect_clicked()
 {
     tcp_ssl *tcp_dialog = new tcp_ssl;
     hide();
-    setWindowFlag(Qt::WindowStaysOnTopHint,false);
+    setWindowFlag(Qt::WindowStaysOnTopHint, false);
     show();
-    tcp_dialog->setAttribute(Qt::WA_QuitOnClose,false);
+    tcp_dialog->setAttribute(Qt::WA_QuitOnClose, false);
     tcp_dialog->show();
 }

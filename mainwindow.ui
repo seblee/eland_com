@@ -106,6 +106,9 @@ p, li { white-space: pre-wrap; }
           <property name="text">
            <string>Open Serial</string>
           </property>
+          <property name="shortcut">
+           <string>S</string>
+          </property>
          </widget>
         </item>
         <item>
