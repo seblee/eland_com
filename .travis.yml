@@ -1,7 +1,5 @@
-language: cpp
-compiler:
-  - clang
-	- gcc
-ruby: 2.2.0
-# Change this to your needs
-# script: ./configure && make
+language: ruby
+rvm:
+ - 2.2
+ - jruby
+ - rbx-3
