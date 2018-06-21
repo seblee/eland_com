@@ -38,15 +38,18 @@ typedef enum {
     ELAND_DELETE_0E,     /* DEVICE DATA DELETE */
 } __msg_function_t;
 
-typedef enum {
+typedef enum
+{
     EL_ERROR_NONE = 0x00, /*error none */
     EL_HTTP_TIMEOUT,      /*http time out*/
     EL_HTTP_204,          /*http 204*/
     EL_HTTP_400,          /*http 400*/
     EL_HTTP_OTHER,        /*http other error*/
     EL_FLASH_READ,        /*flash read error*/
-    EL_AUDIO_PLAY         /*audio play error*/
+    EL_AUDIO_PLAY,        /*audio play error*/
+    EL_MAIN_THREAD,      /*file download  error*/
 } __eland_error_t;
+
 
 typedef enum {
     REFRESH_NONE = 0,
@@ -152,6 +155,9 @@ void MainWindow::Read_Data()
                         case EL_AUDIO_PLAY :        /*audio play error*/
                             str += tr("AUDIO_PLAY ERROR");
                             break;
+                        case EL_MAIN_THREAD :        /*audio play error*/
+                            str += tr("EL_MAIN_THREAD ERROR");
+                            break;
                         default:
                             str += tr("ERROR_NONE");
                             break;
@@ -174,7 +180,20 @@ void MainWindow::Read_Data()
                         }
                         break;
                     case TIME_SET_03:
-                        str += tr("time set ");
+                        str += tr("time set:");
+                        str += QString::number(*(unsigned char *)(buf.data() + 9), 10);
+                        str += tr("-");
+                        str += QString::number(*(unsigned char *)(buf.data() + 8), 10);
+                        str += tr("-");
+                        str += QString::number(*(unsigned char *)(buf.data() + 7), 10);
+                        str += tr(" ");
+                        str += QString::number(*(unsigned char *)(buf.data() + 5), 10);
+                        str += tr(":");
+                        str += QString::number(*(unsigned char *)(buf.data() + 4), 10);
+                        str += tr(":");
+                        str += QString::number(*(unsigned char *)(buf.data() + 3), 10);
+                        str += tr(" ");
+                        str += QString::number(*(unsigned char *)(buf.data() + 6), 10);
                         ui->textEdit->moveCursor(QTextCursor::End);
                         ui->textEdit->append(str);
                         break;

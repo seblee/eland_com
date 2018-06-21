@@ -223,7 +223,7 @@ selection-background-color: rgb(170, 0, 255);</string>
         </font>
        </property>
        <property name="text">
-        <string>AM1</string>
+        <string>LT1</string>
        </property>
       </widget>
      </item>
